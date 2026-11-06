@@ -1,0 +1,106 @@
+
+using System;
+using System.Windows.Forms;
+
+namespace JourneLogincenter4u
+{
+    public partial class Loginform : Form
+    {
+        
+        public static string RegisteredUsername = "";
+        public static string RegisteredPassword = "";
+
+        public Loginform()
+        {
+            InitializeComponent();
+
+            Database.CreateDatabase();
+        }
+
+        
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string username = textBox1.Text.Trim();
+            string password = textBox2.Text;
+
+           
+            if (string.IsNullOrWhiteSpace(username) &&
+                string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Please enter your username and password!");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                MessageBox.Show("Please enter your username!");
+                textBox1.Focus();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                MessageBox.Show("Please enter your password!");
+                textBox2.Focus();
+                return;
+            }
+
+            
+            if ((username == "admin" && password == "12345") ||
+                (username == RegisteredUsername &&
+                 password == RegisteredPassword &&
+                 RegisteredUsername != ""))
+            {
+                MessageBox.Show("Login Successful! Welcome!");
+
+                // Open Form3
+                Form3 home = new Form3();
+                home.Show();
+
+                this.Hide();
+            }
+            else if (username != RegisteredUsername &&
+                     password == RegisteredPassword &&
+                     RegisteredUsername != "")
+            {
+                MessageBox.Show("Incorrect Username!");
+                textBox1.Focus();
+            }
+            else if (username == RegisteredUsername &&
+                     password != RegisteredPassword &&
+                     RegisteredUsername != "")
+            {
+                MessageBox.Show("Incorrect Password!");
+                textBox2.Clear();
+                textBox2.Focus();
+            }
+            else
+            {
+                MessageBox.Show("Username and Password are incorrect!");
+                textBox1.Clear();
+                textBox2.Clear();
+                textBox1.Focus();
+            }
+        }
+
+       
+        private void linkLabel1_LinkClicked(
+            object sender,
+            LinkLabelLinkClickedEventArgs e)
+        {
+            Registerform register = new Registerform();
+
+            register.Show();
+
+            this.Hide();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+        }
+    }
+}

@@ -1,0 +1,110 @@
+﻿
+using ADOX;
+using System;
+using System.Data;
+using System.Data.OleDb;
+using System.IO;
+using System.Windows.Forms;
+
+namespace JourneLogincenter4u
+{
+    public static class Database
+    {
+        public static string DatabasePath =
+            Path.Combine(
+                Application.StartupPath,
+                "EdrichLoginDB.accdb"
+            );
+
+        public static string ConnectionString =
+            @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" +
+            DatabasePath + ";";
+
+        public static void CreateDatabase()
+        {
+            try
+            {
+               
+                if (!File.Exists(DatabasePath))
+                {
+                    Catalog catalog = new Catalog();
+
+                    try
+                    {
+                        catalog.Create(ConnectionString);
+                    }
+                    finally
+                    {
+                        if (System.Runtime.InteropServices.Marshal
+                            .IsComObject(catalog))
+                        {
+                            System.Runtime.InteropServices.Marshal
+                                .FinalReleaseComObject(catalog);
+                        }
+                    }
+                }
+
+                
+                using (OleDbConnection con =
+                    new OleDbConnection(ConnectionString))
+                {
+                    con.Open();
+
+                    DataTable tables =
+                        con.GetSchema("Tables");
+
+                    bool tableExists = false;
+
+                    foreach (DataRow row in tables.Rows)
+                    {
+                        string? tableName = row["TABLE_NAME"]?.ToString();
+
+                        if (string.Equals(
+                            tableName,
+                            "Users",
+                            StringComparison.OrdinalIgnoreCase))
+                        {
+                            tableExists = true;
+                            break;
+                        }
+                    }
+
+                    if (!tableExists)
+                    {
+                        string query = @"
+                            CREATE TABLE Users
+                            (
+                                ID AUTOINCREMENT PRIMARY KEY,
+                                FullName TEXT(100),
+                                Username TEXT(50),
+                                PasswordSalt TEXT(100),
+                                PasswordHash TEXT(100)
+                            )";
+
+                        using (OleDbCommand cmd =
+                            new OleDbCommand(query, con))
+                        {
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                MessageBox.Show(
+                    "Database connected successfully!",
+                    "Success",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Database Error:\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+    }
+}
